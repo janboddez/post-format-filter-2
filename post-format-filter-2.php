@@ -37,6 +37,14 @@ class Post_Format_Filter {
 	 */
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'admin_init' ), 99 );
+		add_action( 'plugins_loaded', array( $this, 'load_textdomain' ) );
+	}
+
+	/**
+	 * Enables i18n of this plugin.
+	 */
+	public function load_textdomain() {
+		load_plugin_textdomain( 'post-format-filter-2', false, basename( dirname( __FILE__ ) ) . '/languages' );
 	}
 
 	/**
@@ -66,15 +74,14 @@ class Post_Format_Filter {
 	 */
 	public function parse_query( $query ) {
 		if ( ! $this->is_supported_posts_screen() ) {
-			// Post formats not relevant or not supported.
 			return;
 		}
 
-		$this->post_formats = get_post_format_strings(); // All possible post formats WordPress supports.
+		$this->post_formats = get_post_format_strings();
 		array_shift( $this->post_formats );
 		$this->post_formats = apply_filters( 'pff_post_formats', $this->post_formats ); // Not changing filter name for backwards compatibility.
 
-		$format = $this->get_format(); // The currently displayed post format. (Slug, or empty string if none.)
+		$format = $this->get_format(); // Slug of the currently displayed post format.
 
 		if ( empty( $format ) ) {
 			return;
@@ -97,7 +104,7 @@ class Post_Format_Filter {
 		if ( $this->is_supported_posts_screen() ) {
 			?>
 			<select name="post_format_filter" id="post_format_filter">
-				<option value=""> <?php _e( 'Show all post formats', 'post-format-filter-2' ); ?> </option>
+				<option value=""> <?php _e( 'All post formats', 'post-format-filter-2' ); ?> </option>
 				<?php foreach ( $this->post_formats as $slug => $name ) : ?>
 				<option value="<?php echo $slug; ?>" <?php selected( $this->get_format() === $slug ); ?>><?php _e( $name ); ?></option>
 				<?php endforeach;?>
@@ -127,7 +134,7 @@ class Post_Format_Filter {
 	private function is_supported_posts_screen() {
 		$current_screen = get_current_screen();
 
-		if ( null !== $current_screen && ( 'edit' === $current_screen->base /* || 'edit' === $current_screen->parent_base */ ) && in_array( $current_screen->post_type, $this->post_types ) ) {
+		if ( ! is_null( $current_screen ) && 'edit' === $current_screen->base && in_array( $current_screen->post_type, $this->post_types ) ) {
 			return true;
 		}
 
