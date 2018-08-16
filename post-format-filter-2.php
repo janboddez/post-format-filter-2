@@ -104,7 +104,7 @@ class Post_Format_Filter {
 		if ( $this->is_supported_posts_screen() ) {
 			?>
 			<select name="post_format_filter" id="post_format_filter">
-				<option value=""> <?php _e( 'All post formats', 'post-format-filter-2' ); ?> </option>
+				<option value=""><?php _e( 'All post formats', 'post-format-filter-2' ); ?></option>
 				<?php foreach ( $this->post_formats as $slug => $name ) : ?>
 				<option value="<?php echo $slug; ?>" <?php selected( $this->get_format() === $slug ); ?>><?php _e( $name ); ?></option>
 				<?php endforeach;?>
