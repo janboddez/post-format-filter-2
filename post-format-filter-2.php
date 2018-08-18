@@ -8,7 +8,7 @@
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  * Version: 0.2
  * Text Domain: post-format-filter-2
- * Plugin URI: https://janboddez.be/post-format-filter-2/ 
+ * Plugin URI: https://janboddez.be/post-format-filter-2/
  * GitHub Plugin URI: https://github.com/janboddez/jb-twikey-gateway-for-woocommerce
  */
 
