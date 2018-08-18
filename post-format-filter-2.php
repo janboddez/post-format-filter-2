@@ -5,7 +5,7 @@
  * Author URI: https://janboddez.be/
  * License: GNU General Public License v2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Version: 0.1
+ * Version: 0.2
  * Text Domain: post-format-filter-2
  */
 
@@ -65,10 +65,8 @@ class Post_Format_Filter {
 	}
 
 	/**
-	 * On relevant admin_screens, forces filtering by post format by defining a
-	 * new `tax_query` query var, and sets the available post formats.
-	 *
-	 * Triggered after WP_Query->parse_query() has set up query variables.
+	 * Sets the available post formats, and adds the ability the filter out
+	 * 'standard' post formats.
 	 *
 	 * @param WP_Query $query The query object that parsed the query.
 	 */
@@ -78,23 +76,32 @@ class Post_Format_Filter {
 		}
 
 		$this->post_formats = get_post_format_strings();
-		array_shift( $this->post_formats );
-		$this->post_formats = apply_filters( 'pff_post_formats', $this->post_formats ); // Not changing filter name for backwards compatibility.
 
-		$format = $this->get_format(); // Slug of the currently displayed post format.
+		/*
+		 * WordPress on its own will not show only 'standard' posts, hence below
+		 * workaround.
+		 */
+		if ( isset( $query->query_vars['post_format'] ) && 'post-format-standard' === $query->query_vars['post_format'] ) {
+			// Remove the 'post_format' query_var ...
+			unset( $query->query_vars['post_format'] );
 
-		if ( empty( $format ) ) {
-			return;
+			$terms = array_keys( $this->post_formats );
+			array_shift( $terms );
+
+			foreach ( $terms as $index => $term ) {
+				$terms[ $index ] = 'post-format-' . $term;
+			}
+
+			// ... and add our own custom 'taxonomy query'.
+			$tax_query = array( 
+				'taxonomy' => 'post_format',
+				'field' => 'slug',
+				'terms' => $terms,
+				'operator' => 'NOT IN',
+				'include_children' => 1,
+			);
+			set_query_var( 'tax_query', array( $tax_query ) );
 		}
-
-		$tax_query = array( 
-			'taxonomy' => 'post_format', 
-			'terms' => array( 'post-format-' . $format ), 
-			'field' => 'slug', 
-			'operator' => 'IN',
-			'include_children' => 1,
-		);
-		set_query_var( 'tax_query', array( $tax_query ) );
 	}
 
 	/**
@@ -102,28 +109,20 @@ class Post_Format_Filter {
 	 */
 	public function restrict_manage_posts() {
 		if ( $this->is_supported_posts_screen() ) {
+			$format = '';
+
+			if ( ! empty( $_GET['post_format'] ) ) {
+				$format = $_GET['post_format'];
+			}
 			?>
-			<select name="post_format_filter" id="post_format_filter">
+			<select name="post_format" id="post_format">
 				<option value=""><?php _e( 'All post formats', 'post-format-filter-2' ); ?></option>
 				<?php foreach ( $this->post_formats as $slug => $name ) : ?>
-				<option value="<?php echo $slug; ?>" <?php selected( $this->get_format() === $slug ); ?>><?php _e( $name ); ?></option>
+				<option value="<?php echo $slug; ?>" <?php selected( $format === $slug ); ?>><?php _e( $name ); ?></option>
 				<?php endforeach;?>
 			</select>
 			<?php
 		}
-	}
-
-	/**
-	 * Returns the currently displayed post format.
-	 *
-	 * @return string Slug of the currently displayed post format, if any. Empty string otherwise.
-	 */
-	private function get_format() {
-		if ( ! empty( $_GET['post_format_filter'] ) && array_key_exists( $_GET['post_format_filter'], $this->post_formats ) ) {
-			return  $_GET['post_format_filter'];
-		}
-
-		return '';
 	}
 
 	/**
