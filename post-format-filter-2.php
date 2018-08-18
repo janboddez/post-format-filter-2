@@ -14,11 +14,15 @@ defined( 'ABSPATH' ) or exit;
 
 /**
  * Main plugin class.
+ *
+ * @since 0.1
  */
 class Post_Format_Filter {
 	/**
 	 * Post types that support post formats. set by @see
 	 * Post_Format_Filter->admin_init().
+	 *
+	 * @since 0.1
 	 *
 	 * @var array $post_types Post types that support post formats..
 	 */
@@ -28,12 +32,16 @@ class Post_Format_Filter {
 	 * Supported post formats (for the current post type). Set by @see
 	 * Post_Format_Filter->parse_query().
 	 *
+	 * @since 0.1
+	 *
 	 * @var array $post_formats Supported post formats.
 	 */
 	private $post_formats = array();
 
 	/**
 	 * Registers the main callback function.
+	 *
+	 * @since 0.1
 	 */
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'admin_init' ), 99 );
@@ -42,6 +50,8 @@ class Post_Format_Filter {
 
 	/**
 	 * Enables i18n of this plugin.
+	 *
+	 * @since 0.1
 	 */
 	public function load_textdomain() {
 		load_plugin_textdomain( 'post-format-filter-2', false, basename( dirname( __FILE__ ) ) . '/languages' );
@@ -50,6 +60,8 @@ class Post_Format_Filter {
 	/**
 	 * Registers relevant action hooks, sets post types that support post
 	 * formats.
+	 *
+	 * @since 0.1
 	 */
 	public function admin_init() {
 		add_action( 'parse_query', array( $this, 'parse_query' ) );
@@ -68,6 +80,8 @@ class Post_Format_Filter {
 	 * Sets the available post formats, and adds the ability the filter out
 	 * 'standard' post formats.
 	 *
+	 * @since 0.1
+	 *
 	 * @param WP_Query $query The query object that parsed the query.
 	 */
 	public function parse_query( $query ) {
@@ -77,12 +91,9 @@ class Post_Format_Filter {
 
 		$this->post_formats = get_post_format_strings();
 
-		/*
-		 * WordPress on its own will not show only 'standard' posts, hence below
-		 * workaround.
-		 */
+		/* WordPress on its own will never show only 'standard' posts, hence below  workaround. */
 		if ( isset( $query->query_vars['post_format'] ) && 'post-format-standard' === $query->query_vars['post_format'] ) {
-			// Remove the 'post_format' query_var ...
+			/* Remove the 'post_format' query_var ... */
 			unset( $query->query_vars['post_format'] );
 
 			$terms = array_keys( $this->post_formats );
@@ -92,7 +103,7 @@ class Post_Format_Filter {
 				$terms[ $index ] = 'post-format-' . $term;
 			}
 
-			// ... and add our own custom 'taxonomy query'.
+			/* ... and add our own custom 'taxonomy query'. */
 			$tax_query = array( 
 				'taxonomy' => 'post_format',
 				'field' => 'slug',
@@ -105,7 +116,9 @@ class Post_Format_Filter {
 	}
 
 	/**
-	 * Adds the post filter dropdowm to relevant admin screens.
+	 * Adds the post filter dropdown to relevant admin screens.
+	 *
+	 * @since 0.1
 	 */
 	public function restrict_manage_posts() {
 		if ( $this->is_supported_posts_screen() ) {
@@ -129,6 +142,8 @@ class Post_Format_Filter {
 	 * Checks if the currently displayed admin screen supports post formats.
 	 *
 	 * @return bool If the current admin screen supports post formats.
+	 *
+	 * @since 0.1
 	 */
 	private function is_supported_posts_screen() {
 		$current_screen = get_current_screen();
