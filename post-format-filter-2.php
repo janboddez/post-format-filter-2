@@ -1,6 +1,7 @@
 <?php
 /**
  * Plugin Name: Post Format Filter 2
+ * Description: Adds a Post Format filter to the WP Admin Posts Screen.
  * Author: Jan Boddez
  * Author URI: https://janboddez.be/
  * License: GNU General Public License v2 or later
