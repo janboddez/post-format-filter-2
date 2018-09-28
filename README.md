@@ -5,4 +5,4 @@ This plugin is a fork of the 7-year-old [Post Format Filter](https://wordpress.o
 
 I shortened the code quite a bit, removing outdated functionality and replacing global variables with WordPress functions that have since been introduced.
 
-**Of note:** This version now also allows filtering out **'Standard'** posts (or posts that lack a Post Format).
+**Of note:** this version now also allows filtering out **'Standard'** posts (or posts that lack a Post Format).
