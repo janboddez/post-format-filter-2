@@ -6,7 +6,7 @@
  * Author URI: https://janboddez.be/
  * License: GNU General Public License v2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Version: 0.3.1
+ * Version: 0.4
  * Text Domain: post-format-filter-2
  * Plugin URI: https://janboddez.be/post-format-filter-2/
  * GitHub Plugin URI: https://github.com/janboddez/post-format-filter-2
@@ -77,7 +77,6 @@ class Post_Format_Filter {
 				$this->post_types[] = $slug;
 
 				add_filter( 'manage_' . $slug . '_posts_columns', array( $this, 'add_post_format_column' ) );
-				add_filter( 'manage_edit-' . $slug . '_sortable_columns', array( $this, 'make_post_format_column_sortable' ) );
 				add_action( 'manage_' . $slug . '_posts_custom_column', array( $this, 'post_format_column' ), 10, 2);
 			}
 		}
@@ -156,16 +155,6 @@ class Post_Format_Filter {
 	}
 
 	/**
-	 * Makes the post format column sortable.
-	 *
-	 * @since 0.3
-	 */
-	public function make_post_format_column_sortable( $columns ) {
-		$columns['post_format'] = 'title';
-		return $columns;
-	}
-
-	/**
 	 * Displays the post format column.
 	 *
 	 * @since 0.3
@@ -193,7 +182,7 @@ class Post_Format_Filter {
 	private function is_supported_posts_screen() {
 		$current_screen = get_current_screen();
 
-		if ( ! is_null( $current_screen ) && 'edit' === $current_screen->base && in_array( $current_screen->post_type, $this->post_types ) ) {
+		if ( is_admin() && ! is_null( $current_screen ) && 'edit' === $current_screen->base && in_array( $current_screen->post_type, $this->post_types ) ) {
 			return true;
 		}
 
