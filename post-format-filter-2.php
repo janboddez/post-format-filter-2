@@ -6,10 +6,10 @@
  * Author URI: https://janboddez.be/
  * License: GNU General Public License v2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Version: 0.2
+ * Version: 0.3
  * Text Domain: post-format-filter-2
  * Plugin URI: https://janboddez.be/post-format-filter-2/
- * GitHub Plugin URI: https://github.com/janboddez/jb-twikey-gateway-for-woocommerce
+ * GitHub Plugin URI: https://github.com/janboddez/post-format-filter-2
  */
 
 /* Prevents this script from being loaded directly. */
@@ -75,6 +75,10 @@ class Post_Format_Filter {
 		foreach ( $post_types as $slug => $name ) {
 			if ( post_type_supports( $slug, 'post-formats' ) ) {
 				$this->post_types[] = $slug;
+
+				add_filter( 'manage_' . $slug . '_posts_columns', array( $this, 'add_post_format_column' ) );
+				add_filter( 'manage_edit-' . $slug . '_sortable_columns', array( $this, 'make_columns_sortable' ) );
+				add_action( 'manage_' . $slug . '_posts_custom_column', array( $this, 'post_format_column' ), 10, 2);
 			}
 		}
 	}
@@ -119,25 +123,63 @@ class Post_Format_Filter {
 	}
 
 	/**
-	 * Adds the post filter dropdown to relevant admin screens.
+	 * Adds the post format filter to relevant admin screens.
 	 *
 	 * @since 0.1
 	 */
 	public function restrict_manage_posts() {
 		if ( $this->is_supported_posts_screen() ) {
-			$format = '';
+			$post_format = '';
 
 			if ( ! empty( $_GET['post_format'] ) ) {
-				$format = $_GET['post_format'];
+				$post_format = $_GET['post_format'];
 			}
 			?>
 			<select name="post_format" id="post_format">
 				<option value=""><?php _e( 'All post formats', 'post-format-filter-2' ); ?></option>
 				<?php foreach ( $this->post_formats as $slug => $name ) : ?>
-				<option value="<?php echo $slug; ?>" <?php selected( $format === $slug ); ?>><?php _e( $name ); ?></option>
+				<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $post_format, $slug ); ?>><?php echo esc_html( $name ); ?></option>
 				<?php endforeach;?>
 			</select>
 			<?php
+		}
+	}
+
+	/**
+	 * Adds a post format column to relevant admin screens.
+	 *
+	 * @since 0.3
+	 */
+	public function add_post_format_column( $columns ) {
+		$columns['post_format'] = __( 'Post Format', 'post-format-filter-2' );
+		return $columns;
+	}
+
+	/**
+	 * Makes the post format column sortable.
+	 *
+	 * @since 0.3
+	 */
+	public function make_post_format_column_sortable( $columns ) {
+		$columns['post_format'] = 'title';
+		return $columns;
+	}
+
+	/**
+	 * Displays the post format column.
+	 *
+	 * @since 0.3
+	 */
+	public function post_format_column( $column, $post_id ) {
+		if ( 'post_format' === $column ) {
+			$post_format = get_post_format( $post_id );
+			$post_type = get_post_type( $post_id );
+
+			if ( false !== $post_format ) {
+				echo '<a href="' . esc_url( admin_url( 'edit.php?post_format=' . $post_format . '&post_type=' . $post_type ) ) . '">' . esc_html( ucwords( $post_format ) ) . '</a>';
+			} else {
+				echo '<a href="' . esc_url( admin_url( 'edit.php?post_format=standard&post_type=' . $post_type ) ) . '">' . __( 'Standard' ) . '</a>';
+			}
 		}
 	}
 
