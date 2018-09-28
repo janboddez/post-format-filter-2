@@ -5,7 +5,4 @@ This plugin is a fork of the 7-year-old [Post Format Filter](https://wordpress.o
 
 I shortened the code quite a bit, removing outdated functionality and replacing global variables with WordPress functions that have since been introduced.
 
-This version also allows filtering out **'Standard'** posts (or posts that lack a Post Format).
-
-## To Do
-- Add a sortable Post Format column to the Posts Screen
+**Of note:** This version also allows filtering out **'Standard'** posts (or posts that lack a Post Format).
